@@ -155,6 +155,7 @@ textarea.input{resize:vertical;min-height:64px}
   display:grid;grid-template-columns:repeat(3,1fr);
   padding-bottom:env(safe-area-inset-bottom);
 }
+.nav.four{grid-template-columns:repeat(4,1fr)}
 .nav button{padding:9px 4px 10px;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);font-size:12px}
 .nav button svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .nav button[aria-current="page"]{color:var(--green);font-weight:700}
@@ -244,14 +245,20 @@ ol.steps{padding-left:20px;font-size:14px;line-height:1.7}
 <!-- ── ລີເຊັດລະຫັດຜ່ານ ── -->
 <div id="gate-reset" class="gate" style="display:none">
   <div class="card">
-    <h1>ລີເຊັດລະຫັດຜ່ານ</h1>
-    <p class="sub">ໃສ່ອີເມວເພື່ອໄດ້ຮັບລິງຄ໌ກູ່</p>
+    <h1>ລືມລະຫັດຜ່ານ</h1>
+    <p class="sub">ໃສ່ອີເມວທີ່ໃຊ້ສະໝັກ ລະບົບຈະສົ່ງລິງຄ໌ໄປໃຫ້</p>
     <div class="err" id="reseterr"></div>
     <label class="f"><span>ອີເມວ</span>
       <input class="input mono" id="reset-email" type="email" inputmode="email" placeholder="name@email.com"></label>
-    <button class="btn" id="btnSendReset">ສົ່ງລິງຄ໌</button>
+    <button class="btn" id="btnSendReset">ສົ່ງລິງຄ໌ປ່ຽນລະຫັດ</button>
     <div style="height:9px"></div>
     <button class="btn ghost" id="btnBackLogin">ກັບໄປເຂົ້າສູ່ລະບົບ</button>
+    <div style="background:#FFF6E5;border:1px solid #E8D5A8;border-radius:10px;padding:12px;margin-top:16px;font-size:13px;line-height:1.6;color:#6B5A2E">
+      <b>ຖ້າບໍ່ເຫັນອີເມວ</b><br>
+      1. ກວດເບິ່ງກ່ອງ <b>Spam / Junk</b> — ຊອກຫາຜູ້ສົ່ງ <span style="font-family:var(--mono);font-size:11px">noreply@usb1-a6129.firebaseapp.com</span><br>
+      2. ພົບແລ້ວກົດ “ບໍ່ແມ່ນ Spam” ເທື່ອດຽວ ເທື່ອຕໍ່ໄປຈະເຂົ້າກ່ອງປົກກະຕິ<br>
+      3. ຍັງບໍ່ໄດ້ — ຕິດຕໍ່ຜູ້ດູແລ ໃຫ້ສ້າງລະຫັດໃໝ່ໃຫ້
+    </div>
   </div>
 </div>
 
@@ -347,12 +354,36 @@ ol.steps{padding-left:20px;font-size:14px;line-height:1.7}
         <button class="btn ghost" id="btnPrint">🖨 ພິມລາຍງານ / ບັນທຶກເປັນ PDF</button>
       </div>
     </section>
+
+    <!-- ── ຜູ້ດູແລ ── -->
+    <section class="view" id="v-admin">
+      <div class="card">
+        <p class="eyebrow">ສ້າງບັນຊີພະນັກງານ</p>
+        <div class="err" id="adminerr"></div>
+        <label class="f"><span>ອີເມວພະນັກງານ</span>
+          <input class="input mono" id="ad-email" type="email" inputmode="email" placeholder="staff@email.com"></label>
+        <label class="f"><span>ລະຫັດຜ່ານເລີ່ມຕົ້ນ (ຢ່າງນ້ອຍ 6 ຕົວ)</span>
+          <input class="input mono" id="ad-pass" type="text" placeholder="ຕັ້ງໃຫ້ເຂົາ ແລ້ວບອກເຂົາ"></label>
+        <label class="f"><span>ຊື່ພະນັກງານ</span>
+          <input class="input" id="ad-name" placeholder="ຊື່ຫຼິ້ນ ຫຼື ຊື່ເຕັມ"></label>
+        <button class="btn" id="btnMakeStaff">+ ສ້າງບັນຊີ</button>
+        <p style="font-size:13px;color:var(--muted);margin:12px 0 0">
+          ສ້າງແລ້ວບອກລະຫັດໃຫ້ເຂົາ — ເຂົາເຂົ້າລະບົບແລ້ວກົດ “ປ່ຽນລະຫັດ” ຕັ້ງເອງໄດ້
+        </p>
+      </div>
+
+      <div class="card">
+        <p class="eyebrow">ລາຍຊື່ພະນັກງານ</p>
+        <div id="stafflist"></div>
+      </div>
+    </section>
   </main>
 
-  <nav class="nav">
+  <nav class="nav" id="nav">
     <button data-v="add" aria-current="page"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>ບັນທຶກ</button>
     <button data-v="list"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>ລາຍຊື່</button>
     <button data-v="sum"><svg viewBox="0 0 24 24"><path d="M3 20h18M7 20v-7M12 20V6M17 20v-11"/></svg>ສະຫຼຸບ</button>
+    <button data-v="admin" id="navAdmin" style="display:none"><svg viewBox="0 0 24 24"><path d="M12 3l7 4v5c0 4-3 7-7 9-4-2-7-5-7-9V7z"/></svg>ຜູ້ດູແລ</button>
   </nav>
 </div>
 
@@ -402,9 +433,15 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "366225792922",
   appId: "1:366225792922:web:41e8a26c5e8be185922423"
 };
+
+/* ══════════════════════════════════════════════════════════
+   ອີເມວຜູ້ດູແລ — ຄົນໃນລາຍການນີ້ຈະເຫັນແຖບ “ຜູ້ດູແລ”
+   ເພີ່ມຄົນອື່ນໄດ້ ໂດຍໃສ່ , "อีเมล@..." ຕໍ່ທ້າຍ
+   ══════════════════════════════════════════════════════════ */
+const ADMIN_EMAILS = ["bounmy2899@gmail.com"];
 /* ══════════════════════════════════════════════════════════ */
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, setPersistence, browserLocalPersistence, sendPasswordResetEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp }
@@ -422,8 +459,10 @@ const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db   = initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) });
 const COL  = collection(db, "customers");
+const STAFF = collection(db, "staff");
 
 let items = [], unsub = null, editId = null, addStatus = "open", editStatus = "open", listFilter = "all";
+let staff = [], unsubStaff = null;
 
 /* ---------- ເຄື່ອງມື ---------- */
 const toast = (m) => { const t = $("#toast"); t.textContent = m; t.classList.add("on"); setTimeout(()=>t.classList.remove("on"), 1900); };
@@ -540,16 +579,55 @@ onAuthStateChanged(auth, user => {
     showScreen("#app");
     $("#who").textContent = user.email;
     $("#pass").value = ""; $("#signup-pass").value = "";
+    const isAdmin = ADMIN_EMAILS.includes((user.email||"").toLowerCase());
+    $("#navAdmin").style.display = isAdmin ? "flex" : "none";
+    $("#nav").classList.toggle("four", isAdmin);
     if (!unsub) unsub = onSnapshot(query(COL, orderBy("date","desc")), snap => {
       items = snap.docs.map(d => ({ id:d.id, ...d.data() }));
       renderAll();
     }, err => toast("ໂຫຼດຂໍ້ມູນບໍ່ໄດ້: " + err.code));
+    if (isAdmin && !unsubStaff) unsubStaff = onSnapshot(STAFF, snap => {
+      staff = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+      renderStaff();
+    }, () => {});
   } else {
     if (unsub) { unsub(); unsub = null; }
-    items = [];
+    if (unsubStaff) { unsubStaff(); unsubStaff = null; }
+    items = []; staff = [];
     showScreen("#gate");
   }
 });
+
+/* ---------- ຜູ້ດູແລ: ສ້າງບັນຊີພະນັກງານ ---------- */
+/* ໃຊ້ app ຕົວທີສອງ ເພື່ອບໍ່ໃຫ້ຜູ້ດູແລຖືກເຕະອອກຈາກລະບົບຕອນສ້າງບັນຊີ */
+$("#btnMakeStaff").onclick = async () => {
+  const email = $("#ad-email").value.trim();
+  const pass  = $("#ad-pass").value;
+  const nm    = $("#ad-name").value.trim();
+  if (!email || !pass) { showErr("#adminerr", {code:"x", message:"ກະລຸນາໃສ່ອີເມວ ແລະ ລະຫັດຜ່ານ"}); return; }
+  if (pass.length < 6) { showErr("#adminerr", {code:"auth/weak-password"}); return; }
+  const b = $("#btnMakeStaff"); b.disabled = true;
+  let second = null;
+  try {
+    second = initializeApp(FIREBASE_CONFIG, "creator-" + Date.now());
+    await createUserWithEmailAndPassword(getAuth(second), email, pass);
+    await addDoc(STAFF, { email, name: nm, createdAt: serverTimestamp(), by: auth.currentUser.email });
+    $("#ad-email").value=""; $("#ad-pass").value=""; $("#ad-name").value="";
+    $("#adminerr").classList.remove("on");
+    toast("ສ້າງບັນຊີໃຫ້ " + email + " ແລ້ວ ✓");
+  } catch(e){ showErr("#adminerr", e); }
+  if (second) { try { await deleteApp(second); } catch(_){} }
+  b.disabled = false;
+};
+
+function renderStaff(){
+  $("#stafflist").innerHTML = staff.length ? staff.map(s => `
+    <div class="item">
+      <span class="tag named">${esc((s.name||s.email||"?").slice(0,2))}</span>
+      <span class="meta"><span class="nm">${esc(s.name||"(ບໍ່ໄດ້ໃສ່ຊື່)")}</span><span class="ph">${esc(s.email||"")}</span></span>
+    </div>`).join("")
+    : `<div class="empty">ຍັງບໍ່ມີພະນັກງານທີ່ສ້າງຈາກນີ້</div>`;
+}
 
 /* ---------- ນຳທາງ ---------- */
 document.querySelector(".nav").addEventListener("click", e => {
