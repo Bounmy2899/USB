@@ -36,8 +36,9 @@ body{
   font-size:16px;
   line-height:1.55;
   -webkit-font-smoothing:antialiased;
-  padding-bottom:calc(76px + env(safe-area-inset-bottom));
+  padding-bottom:0;
 }
+body.in-app{ padding-bottom:calc(76px + env(safe-area-inset-bottom)); }
 button,input,select,textarea{font-family:inherit;font-size:16px;color:inherit}
 button{cursor:pointer;border:none;background:none}
 
@@ -274,7 +275,7 @@ ol.steps{padding-left:20px;font-size:14px;line-height:1.7}
 <div id="app" style="display:none">
   <header class="topbar">
     <div class="brand"><b>ບັນທຶກລູກຄ້າ</b><span>ໂຄງການດິນຈັດສັນ ເຂດທົ່ງປົ່ງ</span></div>
-    <div><div class="who" id="who"></div><button class="linkbtn" id="btnOut">ອອກຈາກລະບົບ</button></div>
+    <div><div class="who" id="who"></div><button class="linkbtn" id="btnChangePw">ປ່ຽນລະຫັດ</button> · <button class="linkbtn" id="btnOut">ອອກຈາກລະບົບ</button></div>
   </header>
 
   <main>
@@ -375,6 +376,17 @@ ol.steps{padding-left:20px;font-size:14px;line-height:1.7}
   </div>
 </div></div>
 
+<!-- ── ປ່ຽນລະຫັດຜ່ານ ── -->
+<div class="sheet" id="pwsheet"><div>
+  <h3>ປ່ຽນລະຫັດຜ່ານ</h3>
+  <div class="err" id="pwerr"></div>
+  <label class="f"><span>ລະຫັດຜ່ານປັດຈຸບັນ</span><input class="input mono" id="pw-old" type="password" placeholder="••••••••"></label>
+  <label class="f"><span>ລະຫັດຜ່ານໃໝ່ (ຢ່າງນ້ອຍ 6 ຕົວ)</span><input class="input mono" id="pw-new" type="password" placeholder="••••••••"></label>
+  <button class="btn" id="btnPwSave">ບັນທຶກລະຫັດໃໝ່</button>
+  <div style="height:9px"></div>
+  <button class="btn ghost" id="btnPwCancel">ຍົກເລີກ</button>
+</div></div>
+
 <div class="toast" id="toast"></div>
 <div id="sheetprint"></div>
 
@@ -393,7 +405,7 @@ const FIREBASE_CONFIG = {
 /* ══════════════════════════════════════════════════════════ */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, setPersistence, browserLocalPersistence, sendPasswordResetEmail, sendEmailVerification }
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, setPersistence, browserLocalPersistence, sendPasswordResetEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -450,54 +462,84 @@ const AUTH_ERR = {
   "auth/network-request-failed":"ເຊື່ອມຕໍ່ອິນເຕີເນັດບໍ່ໄດ້",
   "auth/too-many-requests":"ລອງຫຼາຍເທື່ອເກີນໄປ ກະລຸນາລໍຖ້າ"
 };
-const showErr = e => { const b=$("#autherr"); b.textContent = AUTH_ERR[e?.code] || "ເກີດຂໍ້ຜິດພາດ: " + (e?.code||e?.message||""); b.classList.add("on"); };
+const showErr = (sel, e) => { const b=$(sel); b.textContent = AUTH_ERR[e?.code] || "ເກີດຂໍ້ຜິດພາດ: " + (e?.code||e?.message||""); b.classList.add("on"); };
+
+/* ໜ້າຈໍດຽວຕໍ່ຄັ້ງ — ປິດໜ້າອື່ນທັງໝົດ */
+const SCREENS = ["#gate","#gate-reset","#gate-signup","#app"];
+function showScreen(id){
+  SCREENS.forEach(s => { $(s).style.display = "none"; });
+  $(id).style.display = (id === "#app") ? "block" : "grid";
+  document.body.classList.toggle("in-app", id === "#app");
+  document.querySelectorAll(".err").forEach(x => x.classList.remove("on"));
+  window.scrollTo(0,0);
+}
 
 setPersistence(auth, browserLocalPersistence);
-$("#btnLogin").onclick  = () => signInWithEmailAndPassword(auth, $("#email").value.trim(), $("#pass").value).catch(showErr);
-$("#btnSignup").onclick = () => { $("#gate").style.display="none"; $("#gate-signup").style.display="grid"; };
-$("#btnForgot").onclick = () => { $("#gate").style.display="none"; $("#gate-reset").style.display="grid"; };
-$("#btnBackLogin").onclick = () => { $("#gate-reset").style.display="none"; $("#gate").style.display="grid"; $("#reseterr").classList.remove("on"); };
-$("#btnBackSignup").onclick = () => { $("#gate-signup").style.display="none"; $("#gate").style.display="grid"; $("#signuperr").classList.remove("on"); };
+
+$("#btnLogin").onclick  = async () => {
+  const b = $("#btnLogin"); b.disabled = true;
+  try { await signInWithEmailAndPassword(auth, $("#email").value.trim(), $("#pass").value); }
+  catch(e){ showErr("#autherr", e); }
+  b.disabled = false;
+};
+$("#btnSignup").onclick    = () => showScreen("#gate-signup");
+$("#btnForgot").onclick    = () => { $("#reset-email").value = $("#email").value.trim(); showScreen("#gate-reset"); };
+$("#btnBackLogin").onclick = () => showScreen("#gate");
+$("#btnBackSignup").onclick= () => showScreen("#gate");
+
 $("#btnSendReset").onclick = async () => {
   const email = $("#reset-email").value.trim();
-  if (!email) { $("#reseterr").textContent="ກະລຸນາໃສ່ອີເມວ"; $("#reseterr").classList.add("on"); return; }
+  if (!email) { showErr("#reseterr", {code:"x", message:"ກະລຸນາໃສ່ອີເມວ"}); return; }
+  const b = $("#btnSendReset"); b.disabled = true;
   try {
     await sendPasswordResetEmail(auth, email);
-    toast("ລິງຄ໌ກູ່ສົ່ງໄປທີ່ " + email);
-    $("#gate-reset").style.display="none"; $("#gate").style.display="grid";
-  } catch(e) {
-    $("#reseterr").textContent = AUTH_ERR[e.code] || e.message;
-    $("#reseterr").classList.add("on");
-  }
+    showScreen("#gate");
+    toast("ສົ່ງລິງຄ໌ໄປແລ້ວ — ກວດເບິ່ງກ່ອງ Spam ນຳ");
+  } catch(e){ showErr("#reseterr", e); }
+  b.disabled = false;
 };
+
 $("#btnCreateAccount").onclick = async () => {
   const email = $("#signup-email").value.trim();
-  const pass = $("#signup-pass").value;
-  if (!email || !pass) { 
-    $("#signuperr").textContent="ກະລຸນາໃສ່ອີເມວ ແລະ ລະຫັດຜ່ານ"; 
-    $("#signuperr").classList.add("on"); 
-    return; 
-  }
+  const pass  = $("#signup-pass").value;
+  if (!email || !pass) { showErr("#signuperr", {code:"x", message:"ກະລຸນາໃສ່ອີເມວ ແລະ ລະຫັດຜ່ານ"}); return; }
+  const b = $("#btnCreateAccount"); b.disabled = true;
   try {
-    const res = await createUserWithEmailAndPassword(auth, email, pass);
-    await sendEmailVerification(res.user);
-    toast("ບັນຊີສຳເລັດ! ກະລຸນາຢືນຢັນອີເມວ");
-    $("#gate-signup").style.display="none"; $("#gate").style.display="grid";
-  } catch(e) {
-    $("#signuperr").textContent = AUTH_ERR[e.code] || e.message;
-    $("#signuperr").classList.add("on");
-  }
+    await createUserWithEmailAndPassword(auth, email, pass);
+    toast("ສ້າງບັນຊີສຳເລັດ ✓");
+  } catch(e){ showErr("#signuperr", e); }
+  b.disabled = false;
 };
+
 $("#pass").addEventListener("keydown", e => { if(e.key==="Enter") $("#btnLogin").click(); });
+$("#signup-pass").addEventListener("keydown", e => { if(e.key==="Enter") $("#btnCreateAccount").click(); });
+$("#reset-email").addEventListener("keydown", e => { if(e.key==="Enter") $("#btnSendReset").click(); });
 $("#btnOut").onclick = () => signOut(auth);
+
+/* ປ່ຽນລະຫັດຜ່ານໃນລະບົບ (ບໍ່ຕ້ອງໃຊ້ອີເມວ) */
+$("#btnChangePw").onclick = () => { $("#pw-old").value=""; $("#pw-new").value=""; $("#pwerr").classList.remove("on"); $("#pwsheet").classList.add("on"); };
+$("#btnPwCancel").onclick = () => $("#pwsheet").classList.remove("on");
+$("#pwsheet").addEventListener("click", e => { if(e.target === $("#pwsheet")) $("#pwsheet").classList.remove("on"); });
+$("#btnPwSave").onclick = async () => {
+  const oldPw = $("#pw-old").value, newPw = $("#pw-new").value;
+  if (!oldPw || !newPw) { showErr("#pwerr", {code:"x", message:"ກະລຸນາໃສ່ໃຫ້ຄົບ"}); return; }
+  if (newPw.length < 6) { showErr("#pwerr", {code:"auth/weak-password"}); return; }
+  const b = $("#btnPwSave"); b.disabled = true;
+  try {
+    const u = auth.currentUser;
+    await reauthenticateWithCredential(u, EmailAuthProvider.credential(u.email, oldPw));
+    await updatePassword(u, newPw);
+    $("#pwsheet").classList.remove("on");
+    toast("ປ່ຽນລະຫັດຜ່ານແລ້ວ ✓");
+  } catch(e){ showErr("#pwerr", e); }
+  b.disabled = false;
+};
 
 onAuthStateChanged(auth, user => {
   if (user) {
-    $("#gate").style.display = "none";
-    $("#app").style.display  = "block";
+    showScreen("#app");
     $("#who").textContent = user.email;
-    $("#autherr").classList.remove("on");
-    $("#pass").value = "";
+    $("#pass").value = ""; $("#signup-pass").value = "";
     if (!unsub) unsub = onSnapshot(query(COL, orderBy("date","desc")), snap => {
       items = snap.docs.map(d => ({ id:d.id, ...d.data() }));
       renderAll();
@@ -505,8 +547,7 @@ onAuthStateChanged(auth, user => {
   } else {
     if (unsub) { unsub(); unsub = null; }
     items = [];
-    $("#app").style.display  = "none";
-    $("#gate").style.display = "grid";
+    showScreen("#gate");
   }
 });
 
