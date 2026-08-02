@@ -235,6 +235,38 @@ ol.steps{padding-left:20px;font-size:14px;line-height:1.7}
     <button class="btn" id="btnLogin">ເຂົ້າສູ່ລະບົບ</button>
     <div style="height:9px"></div>
     <button class="btn ghost" id="btnSignup">ສະໝັກບັນຊີໃໝ່</button>
+    <div style="height:6px"></div>
+    <button class="btn ghost" id="btnForgot" style="font-size:14px">ລືມລະຫັດຜ່ານ?</button>
+  </div>
+</div>
+
+<!-- ── ລີເຊັດລະຫັດຜ່ານ ── -->
+<div id="gate-reset" class="gate" style="display:none">
+  <div class="card">
+    <h1>ລີເຊັດລະຫັດຜ່ານ</h1>
+    <p class="sub">ໃສ່ອີເມວເພື່ອໄດ້ຮັບລິງຄ໌ກູ່</p>
+    <div class="err" id="reseterr"></div>
+    <label class="f"><span>ອີເມວ</span>
+      <input class="input mono" id="reset-email" type="email" inputmode="email" placeholder="name@email.com"></label>
+    <button class="btn" id="btnSendReset">ສົ່ງລິງຄ໌</button>
+    <div style="height:9px"></div>
+    <button class="btn ghost" id="btnBackLogin">ກັບໄປເຂົ້າສູ່ລະບົບ</button>
+  </div>
+</div>
+
+<!-- ── ສະໝັກບັນຊີໃໝ່ ── -->
+<div id="gate-signup" class="gate" style="display:none">
+  <div class="card">
+    <h1>ສະໝັກບັນຊີໃໝ່</h1>
+    <p class="sub">ສ້າງບັນຊີສໍາລັບທີມຂອງເຈົ້າ</p>
+    <div class="err" id="signuperr"></div>
+    <label class="f"><span>ອີເມວ</span>
+      <input class="input mono" id="signup-email" type="email" inputmode="email" placeholder="name@email.com"></label>
+    <label class="f"><span>ລະຫັດຜ່ານ (ຢ່າງນ້ອຍ 6 ຕົວ)</span>
+      <input class="input mono" id="signup-pass" type="password" placeholder="••••••••"></label>
+    <button class="btn" id="btnCreateAccount">ສະໝັກ</button>
+    <div style="height:9px"></div>
+    <button class="btn ghost" id="btnBackSignup">ກັບໄປ</button>
   </div>
 </div>
 
@@ -361,7 +393,7 @@ const FIREBASE_CONFIG = {
 /* ══════════════════════════════════════════════════════════ */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, setPersistence, browserLocalPersistence }
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, setPersistence, browserLocalPersistence, sendPasswordResetEmail, sendEmailVerification }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -422,8 +454,40 @@ const showErr = e => { const b=$("#autherr"); b.textContent = AUTH_ERR[e?.code] 
 
 setPersistence(auth, browserLocalPersistence);
 $("#btnLogin").onclick  = () => signInWithEmailAndPassword(auth, $("#email").value.trim(), $("#pass").value).catch(showErr);
-$("#btnSignup").onclick = () => createUserWithEmailAndPassword(auth, $("#email").value.trim(), $("#pass").value)
-  .then(()=>toast("ສ້າງບັນຊີສຳເລັດ")).catch(showErr);
+$("#btnSignup").onclick = () => { $("#gate").style.display="none"; $("#gate-signup").style.display="grid"; };
+$("#btnForgot").onclick = () => { $("#gate").style.display="none"; $("#gate-reset").style.display="grid"; };
+$("#btnBackLogin").onclick = () => { $("#gate-reset").style.display="none"; $("#gate").style.display="grid"; $("#reseterr").classList.remove("on"); };
+$("#btnBackSignup").onclick = () => { $("#gate-signup").style.display="none"; $("#gate").style.display="grid"; $("#signuperr").classList.remove("on"); };
+$("#btnSendReset").onclick = async () => {
+  const email = $("#reset-email").value.trim();
+  if (!email) { $("#reseterr").textContent="ກະລຸນາໃສ່ອີເມວ"; $("#reseterr").classList.add("on"); return; }
+  try {
+    await sendPasswordResetEmail(auth, email);
+    toast("ລິງຄ໌ກູ່ສົ່ງໄປທີ່ " + email);
+    $("#gate-reset").style.display="none"; $("#gate").style.display="grid";
+  } catch(e) {
+    $("#reseterr").textContent = AUTH_ERR[e.code] || e.message;
+    $("#reseterr").classList.add("on");
+  }
+};
+$("#btnCreateAccount").onclick = async () => {
+  const email = $("#signup-email").value.trim();
+  const pass = $("#signup-pass").value;
+  if (!email || !pass) { 
+    $("#signuperr").textContent="ກະລຸນາໃສ່ອີເມວ ແລະ ລະຫັດຜ່ານ"; 
+    $("#signuperr").classList.add("on"); 
+    return; 
+  }
+  try {
+    const res = await createUserWithEmailAndPassword(auth, email, pass);
+    await sendEmailVerification(res.user);
+    toast("ບັນຊີສຳເລັດ! ກະລຸນາຢືນຢັນອີເມວ");
+    $("#gate-signup").style.display="none"; $("#gate").style.display="grid";
+  } catch(e) {
+    $("#signuperr").textContent = AUTH_ERR[e.code] || e.message;
+    $("#signuperr").classList.add("on");
+  }
+};
 $("#pass").addEventListener("keydown", e => { if(e.key==="Enter") $("#btnLogin").click(); });
 $("#btnOut").onclick = () => signOut(auth);
 
