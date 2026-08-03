@@ -19,7 +19,7 @@ input,select,textarea{font-size:16px;color:inherit}
 #app{display:grid;grid-template-columns:224px 1fr;grid-template-rows:auto 1fr;min-height:100vh}
 .topbar{
   grid-column:1/-1;position:sticky;top:0;z-index:60;
-  background:var(--orange) url("hex.jpg") center/cover;
+  background:var(--orange) url("hex.jpg") left center/auto 100% repeat-x;
   color:#fff;padding:calc(11px + env(safe-area-inset-top)) 22px 11px;
   display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
   box-shadow:0 2px 10px #00000026;
@@ -40,7 +40,7 @@ input,select,textarea{font-size:16px;color:inherit}
 .linkbtn{color:#fff;text-decoration:underline;font-size:12.5px;padding:2px 0}
 
 .sidebar{
-  background:var(--navy) url("tri.png") left bottom/100% auto no-repeat;
+  background:var(--navy) url("tri.png") center bottom/100% auto no-repeat;
   display:flex;flex-direction:column;
   position:sticky;top:var(--hh,86px);align-self:start;
   height:calc(100vh - var(--hh,86px));
