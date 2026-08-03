@@ -19,7 +19,7 @@ input,select,textarea{font-size:16px;color:inherit}
 #app{display:grid;grid-template-columns:224px 1fr;grid-template-rows:auto 1fr;min-height:100vh}
 .topbar{
   grid-column:1/-1;position:sticky;top:0;z-index:60;
-  background:var(--orange) url("hex.jpg") left center/auto 100% repeat-x;
+  background:var(--orange) url("hex.jpg") center center/cover no-repeat;
   color:#fff;padding:calc(11px + env(safe-area-inset-top)) 22px 11px;
   display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
   box-shadow:0 2px 10px #00000026;
@@ -40,16 +40,22 @@ input,select,textarea{font-size:16px;color:inherit}
 .linkbtn{color:#fff;text-decoration:underline;font-size:12.5px;padding:2px 0}
 
 .sidebar{
-  background:var(--navy) url("tri.png") center bottom/100% auto repeat-y;
+  background:var(--navy);
   display:flex;flex-direction:column;
   position:sticky;top:var(--hh,86px);align-self:start;
   height:calc(100vh - var(--hh,86px));
+  overflow-y:auto;
 }
 .logo{display:none}
 .sidenav{display:flex;flex-direction:column;gap:10px;padding:16px 14px}
 .sidenav button{background:#fff;color:var(--navy);border-radius:10px;padding:13px 10px;font-size:17px;font-weight:700;text-align:center;transition:transform .12s}
 .sidenav button:active{transform:scale(.97)}
 .sidenav button[aria-current="page"]{background:var(--orange);color:#fff}
+.sidefoot{margin-top:auto;padding:14px 14px 18px;text-align:center}
+.sidefoot img{width:100%;border-radius:10px;display:block;border:2px solid #ffffff2e}
+.sidefoot p{margin:10px 0 0;color:#D6DCEC;font-size:12px;line-height:1.7}
+.sidefoot p b{display:block;color:#fff;font-size:13px;margin-bottom:3px}
+.sidefoot .tel{display:inline-block;margin-top:6px;background:var(--orange);color:#fff;font-weight:700;border-radius:999px;padding:3px 12px;font-size:12.5px}
 main{padding:22px 26px;max-width:1500px;width:100%;min-width:0}
 .view{display:none;animation:fade .16s ease}
 .view.on{display:block}
@@ -58,16 +64,33 @@ main{padding:22px 26px;max-width:1500px;width:100%;min-width:0}
 
 @media(max-width:840px){
   #app{grid-template-columns:1fr}
-  .topbar{background:#C4620E url("banner.jpg") right center/cover no-repeat;padding:calc(10px + env(safe-area-inset-top)) 14px 12px;gap:10px;align-items:center}
+  .topbar{
+    position:sticky;top:0;z-index:60;isolation:isolate;
+    background:#C4620E;
+    padding:calc(8px + env(safe-area-inset-top)) 12px 9px;
+    gap:8px;align-items:center;row-gap:6px;
+  }
+  .topbar::before{
+    content:"";position:absolute;inset:0;z-index:-1;
+    background:url("dots.png") left top repeat;
+    background-size:44px 44px;
+    pointer-events:none;
+  }
   .wlogo,.brand{display:none}
-  .hlogo{display:block;height:54px}
-  .hpills{display:flex;flex:1;align-items:flex-end;gap:6px}
-  .userbox{width:100%;text-align:center;font-size:11.5px}
-  .userbox .em{max-width:100%}
+  .hlogo{display:block;height:46px;background:#fff;border-radius:9px;padding:4px 8px;box-shadow:0 1px 4px #0000002e}
+  .hpills{display:flex;flex:1;align-items:flex-end;gap:4px}
+  .pill{font-size:13px;padding:4px 12px;border-radius:8px}
+  .userbox{width:auto;margin-left:auto;text-align:right;font-size:11px;line-height:1.45}
+  .userbox .em{max-width:60vw;font-size:10.5px}
+  .userbox .role{font-size:9.5px;padding:0 7px}
+  .userbox .hpic{width:20px;height:20px;margin-right:4px}
+  .linkbtn{font-size:11px}
+  .banner{font-size:11.5px;padding:5px 10px;margin-top:2px;line-height:1.5;max-height:3.1em;overflow:hidden}
   .sidebar{position:fixed;left:0;right:0;bottom:0;top:auto;height:auto;z-index:50;flex-direction:row;
     background:var(--navy);padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -2px 12px #0002}
   .sidenav{flex-direction:row;width:100%;padding:7px 8px;gap:6px}
   .sidenav button{flex:1;font-size:14.5px;padding:10px 4px;border-radius:9px}
+  .sidefoot{display:none}
   main{padding:14px 14px 100px}
 }
 
