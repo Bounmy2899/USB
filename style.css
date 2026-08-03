@@ -58,8 +58,13 @@ input,select,textarea{font-size:16px;color:inherit}
 .sidefoot .tel{display:inline-block;margin-top:6px;background:var(--orange);color:#fff;font-weight:700;border-radius:999px;padding:3px 12px;font-size:12.5px}
 main{padding:20px;max-width:1180px;width:100%;min-width:0;margin-inline:auto}
 
+/* ── ສະແດງເທື່ອລະໜ້າ (ຫ້າມລຶບ: ເປັນຫົວໃຈຂອງການສະຫຼັບແຖບ) ── */
+.view{display:none}
+.view.on{display:block;animation:fade .16s ease}
 @keyframes fade{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+
 
 @media(max-width:840px){
   #app{grid-template-columns:1fr}
@@ -230,15 +235,15 @@ code{font-size:12px;background:var(--line-2);padding:1px 5px;border-radius:4px;w
   #v-list{max-width:960px}
 
   /* ສະຫຼຸບ + ຜູ້ດູແລ — ວາງເປັນ 2 ຖັນແບບ dashboard */
-  #v-sum.on,#v-admin.on{
+  .view.on#v-sum,.view.on#v-admin{
     display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
     gap:16px;align-items:start;
   }
-  #v-sum.on > .card,#v-admin.on > .card{margin-top:0}
-  #v-sum.on > .card:nth-child(1),
-  #v-sum.on > .card:nth-child(6),
-  #v-admin.on > .card:nth-child(1),
-  #v-admin.on > .card:nth-child(4){grid-column:1/-1}
+  .view.on#v-sum > .card,.view.on#v-admin > .card{margin-top:0}
+  .view.on#v-sum > .card:nth-child(1),
+  .view.on#v-sum > .card:nth-child(6),
+  .view.on#v-admin > .card:nth-child(1),
+  .view.on#v-admin > .card:nth-child(4){grid-column:1/-1}
 
   /* ຫົວການ໌ດ — ຂີດສີສົ້ມນຳໜ້າ ໃຫ້ຫາງ່າຍ */
   .card{padding:20px}
