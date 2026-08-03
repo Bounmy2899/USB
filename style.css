@@ -56,9 +56,8 @@ input,select,textarea{font-size:16px;color:inherit}
 .sidefoot p{margin:10px 0 0;color:#D6DCEC;font-size:12px;line-height:1.7}
 .sidefoot p b{display:block;color:#fff;font-size:13px;margin-bottom:3px}
 .sidefoot .tel{display:inline-block;margin-top:6px;background:var(--orange);color:#fff;font-weight:700;border-radius:999px;padding:3px 12px;font-size:12.5px}
-main{padding:22px 26px;max-width:1500px;width:100%;min-width:0}
-.view{display:none;animation:fade .16s ease}
-.view.on{display:block}
+main{padding:20px;max-width:1180px;width:100%;min-width:0;margin-inline:auto}
+
 @keyframes fade{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
@@ -77,15 +76,33 @@ main{padding:22px 26px;max-width:1500px;width:100%;min-width:0}
     pointer-events:none;
   }
   .wlogo,.brand{display:none}
-  .hlogo{display:block;height:46px;background:#fff;border-radius:9px;padding:4px 8px;box-shadow:0 1px 4px #0000002e}
-  .hpills{display:flex;flex:1;align-items:flex-end;gap:4px}
-  .pill{font-size:13px;padding:4px 12px;border-radius:8px}
-  .userbox{width:auto;margin-left:auto;text-align:right;font-size:11px;line-height:1.45}
-  .userbox .em{max-width:60vw;font-size:10.5px}
-  .userbox .role{font-size:9.5px;padding:0 7px}
-  .userbox .hpic{width:20px;height:20px;margin-right:4px}
-  .linkbtn{font-size:11px}
-  .banner{font-size:11.5px;padding:5px 10px;margin-top:2px;line-height:1.5;max-height:3.1em;overflow:hidden}
+
+  /* ແຖວ 1: ໂລໂກ້ຊ້າຍ + ຂໍ້ມູນຜູ້ໃຊ້ຂວາ */
+  .hlogo{
+    order:1;display:block;height:66px;width:auto;flex:none;
+    background:#fff;border-radius:12px;padding:7px 11px;box-shadow:0 2px 7px #00000038;
+  }
+  .userbox{
+    order:2;margin-left:auto;text-align:right;font-size:11.5px;line-height:1.55;
+  }
+  .userbox .em{max-width:52vw;font-size:11px}
+  .userbox .role{font-size:10px;padding:1px 9px}
+  .userbox .hpic{width:22px;height:22px;margin-right:5px}
+  .linkbtn{font-size:11.5px}
+
+  /* ແຖວ 2: ປ້າຍ 2 ອັນ ກວ້າງເທົ່າກັນ ເຕັມແຖວ */
+  .hpills{
+    order:3;display:flex;width:100%;
+    flex-direction:column;align-items:stretch;gap:8px;margin-top:3px;
+  }
+  .pill{
+    display:block;width:100%;box-sizing:border-box;
+    font-size:18px;padding:11px 14px;border-radius:12px;
+    text-align:center;line-height:1.35;
+    box-shadow:0 2px 7px #0000002e;
+  }
+
+  .banner{order:4;font-size:12px;padding:7px 12px;margin-top:5px;line-height:1.55;max-height:3.2em;overflow:hidden}
   .sidebar{position:fixed;left:0;right:0;bottom:0;top:auto;height:auto;z-index:50;flex-direction:row;
     background:var(--navy);padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -2px 12px #0002}
   .sidenav{flex-direction:row;width:100%;padding:7px 8px;gap:6px}
@@ -94,9 +111,9 @@ main{padding:22px 26px;max-width:1500px;width:100%;min-width:0}
   main{padding:14px 14px 100px}
 }
 
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px}
 .card+.card{margin-top:14px}
-.eyebrow{font-size:12.5px;color:var(--muted);margin:0 0 12px;font-weight:700}
+.eyebrow{font-size:13px;color:var(--ink);margin:0 0 14px;font-weight:700;letter-spacing:.01em}
 label.f{display:block;margin-bottom:13px}
 label.f>span{display:block;font-size:13.5px;color:var(--muted);margin-bottom:5px}
 .input{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:9px;background:#fff;outline:none;transition:border-color .15s,box-shadow .15s}
@@ -200,4 +217,48 @@ code{font-size:12px;background:var(--line-2);padding:1px 5px;border-radius:4px;w
   #sheetprint .sum div b{font-size:16px;display:block}
   #sheetprint .sum div span{font-size:10px;color:#555}
   #sheetprint .sig{margin-top:30px;display:flex;justify-content:flex-end;text-align:center;font-size:11px}
+}
+
+/* ═══════════════════════════════════════════════
+   ຈໍຄອມ — ຈັດຂະໜາດ ແລະ ຕຳແໜ່ງໃຫ້ອ່ານງ່າຍ
+   ═══════════════════════════════════════════════ */
+@media(min-width:841px){
+  main{margin-inline:auto;max-width:1180px;padding:26px 32px 56px}
+
+  /* ຟອມ — ຈຳກັດຄວາມກວ້າງ ບໍ່ໃຫ້ຕາກວາດໄກ */
+  #v-add > .card{max-width:720px}
+  #v-list{max-width:960px}
+
+  /* ສະຫຼຸບ + ຜູ້ດູແລ — ວາງເປັນ 2 ຖັນແບບ dashboard */
+  #v-sum.on,#v-admin.on{
+    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:16px;align-items:start;
+  }
+  #v-sum.on > .card,#v-admin.on > .card{margin-top:0}
+  #v-sum.on > .card:nth-child(1),
+  #v-sum.on > .card:nth-child(6),
+  #v-admin.on > .card:nth-child(1),
+  #v-admin.on > .card:nth-child(4){grid-column:1/-1}
+
+  /* ຫົວການ໌ດ — ຂີດສີສົ້ມນຳໜ້າ ໃຫ້ຫາງ່າຍ */
+  .card{padding:20px}
+  .eyebrow{
+    font-size:13px;color:var(--navy);letter-spacing:.01em;
+    padding-left:11px;position:relative;margin-bottom:15px;
+  }
+  .eyebrow::before{
+    content:"";position:absolute;left:0;top:2px;bottom:2px;
+    width:4px;border-radius:3px;background:var(--orange);
+  }
+
+  /* ຕົວເລກສະຫຼຸບ — ໃຫ້ອ່ານໄດ້ໄວ */
+  .bignum b{font-size:52px}
+  .stat{padding:13px 10px}
+  .stat b{font-size:25px}
+
+  /* ວັນທີ ແລະ ຊ່ອງສັ້ນ — ບໍ່ຕ້ອງເຕັມແຖວ */
+  #v-sum .input,#v-list .minibar select{max-width:280px}
+
+  .item{padding:12px 10px}
+  .sheet>div{max-width:560px}
 }
