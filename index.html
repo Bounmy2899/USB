@@ -44,9 +44,10 @@
 
 <div id="app" class="hide">
   <header class="topbar">
-    <div class="brand">
-      <b>ສະຖິຕິລູກຄ້າ ບໍລິສັດ ຢູ່ສະບາຍ ແລນ ແອນ ເຮົາສ໌</b>
-      <span>ໂຄງການດິນຈັດສັນ</span>
+    <img class="hlogo" src="logo.png" alt="U-SABAI">
+    <div class="hpills">
+      <span class="pill navy">ບັນທຶກ ສະຖິຕິລູກຄ້າ</span>
+      <span class="pill white">ໂຄງການດິນຈັດສັນ</span>
     </div>
     <div class="userbox">
       <span class="role" id="roleTag">ພະນັກງານ</span>
@@ -84,7 +85,11 @@
           <select class="input" id="a-project"></select>
           <input class="input hide" id="a-project-other" style="margin-top:8px" placeholder="ພິມຊື່ໂຄງການ ຫຼື ສິ່ງທີ່ລູກຄ້າສົນໃຈ"></label>
         <label class="f"><span>ວັນທີ</span>
-          <input class="input num" id="a-date" type="date"></label>
+          <div class="row" id="a-date-row">
+            <select class="input num" id="a-y"></select>
+            <select class="input num" id="a-m"></select>
+            <select class="input num" id="a-d"></select>
+          </div></label>
         <label class="f"><span>ໝາຍເຫດ</span>
           <textarea class="input" id="a-note" placeholder="ເຊັ່ນ: ຖາມລາຄາຕອນໜ້າຕິດຖະໜົນ"></textarea></label>
         <button class="btn orange" id="btnAdd">+ ເພີ່ມລູກຄ້າ</button>
@@ -180,7 +185,12 @@
     <label class="f"><span>ໂຄງການ</span>
       <select class="input" id="e-project"></select>
       <input class="input hide" id="e-project-other" style="margin-top:8px" placeholder="ພິມຊື່ໂຄງການ"></label>
-    <label class="f"><span>ວັນທີ</span><input class="input num" id="e-date" type="date"></label>
+    <label class="f"><span>ວັນທີ</span>
+      <div class="row">
+        <select class="input num" id="e-y"></select>
+        <select class="input num" id="e-m"></select>
+        <select class="input num" id="e-d"></select>
+      </div></label>
     <label class="f"><span>ໝາຍເຫດ</span><textarea class="input" id="e-note"></textarea></label>
     <div class="ro" id="roMeta"></div>
     <button class="btn" id="btnSave">ບັນທຶກການແກ້ໄຂ</button>

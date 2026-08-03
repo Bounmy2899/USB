@@ -73,6 +73,33 @@ function projValue(sel,other){
 fillProjects("#a-project"); fillProjects("#e-project");
 bindOther("#a-project","#a-project-other"); bindOther("#e-project","#e-project-other");
 
+/* ---------- ວັນທີແບບຕົວເລກສາກົນ (ຄືກັນທຸກເຄື່ອງ) ---------- */
+const pad=n=>String(n).padStart(2,"0");
+function buildDate(py,pm,pd){
+  const nowY=new Date().getFullYear();
+  const ys=[];for(let y=nowY+1;y>=nowY-5;y--)ys.push(y);
+  $(py).innerHTML=ys.map(y=>`<option value="${y}">${y}</option>`).join("");
+  $(pm).innerHTML=Array.from({length:12},(_,i)=>`<option value="${pad(i+1)}">${pad(i+1)}</option>`).join("");
+  const fixDays=()=>{
+    const y=+$(py).value,m=+$(pm).value,keep=$(pd).value;
+    const dim=new Date(y,m,0).getDate();
+    $(pd).innerHTML=Array.from({length:dim},(_,i)=>`<option value="${pad(i+1)}">${pad(i+1)}</option>`).join("");
+    $(pd).value=(+keep&&+keep<=dim)?pad(+keep):$(pd).value;
+  };
+  $(py).addEventListener("change",fixDays);
+  $(pm).addEventListener("change",fixDays);
+  fixDays();
+}
+function setDate(py,pm,pd,iso){
+  const [y,m,d]=(iso||today()).split("-");
+  $(py).value=y; $(pm).value=m;
+  $(py).dispatchEvent(new Event("change"));
+  $(pd).value=d;
+}
+const getDate=(py,pm,pd)=>`${$(py).value}-${$(pm).value}-${$(pd).value}`;
+buildDate("#a-y","#a-m","#a-d"); buildDate("#e-y","#e-m","#e-d");
+setDate("#a-y","#a-m","#a-d",today());
+
 const GATES=["#gate","#gate-reset","#setup"];
 const showGate=id=>{GATES.forEach(g=>$(g).classList.remove("on"));$("#app").classList.add("hide");
   document.querySelectorAll(".err").forEach(x=>x.classList.remove("on"));if(id)$(id).classList.add("on");scrollTo(0,0);};
@@ -133,7 +160,6 @@ $("#nav").addEventListener("click",e=>{
 });
 
 segBind("#a-seg",v=>addStatus=v);
-$("#a-date").value=today();
 $("#btnAdd").onclick=async()=>{
   const phone=$("#a-phone").value.trim();
   if(!phone){toast("ກະລຸນາໃສ່ເບີໂທ");$("#a-phone").focus();return;}
@@ -141,10 +167,10 @@ $("#btnAdd").onclick=async()=>{
   const b=$("#btnAdd");b.disabled=true;
   try{
     await addDoc(COL,{phone,name,autoNum,status:addStatus,project:projValue("#a-project","#a-project-other"),
-      date:$("#a-date").value||today(),note:$("#a-note").value.trim(),
+      date:getDate("#a-y","#a-m","#a-d"),note:$("#a-note").value.trim(),
       by:auth.currentUser.email,deleted:false,createdAt:serverTimestamp()});
     $("#a-phone").value="";$("#a-name").value="";$("#a-note").value="";$("#a-project-other").value="";
-    $("#a-date").value=today();$("#a-project").value=NOPROJ;$("#a-project-other").classList.add("hide");
+    setDate("#a-y","#a-m","#a-d",today());$("#a-project").value=NOPROJ;$("#a-project-other").classList.add("hide");
     segSet("#a-seg","open");addStatus="open";
     toast("ບັນທຶກແລ້ວ ✓");
   }catch(e){toast("ບັນທຶກບໍ່ໄດ້: "+(AUTH_ERR[e.code]||e.code));}
@@ -206,7 +232,7 @@ function openRec(id){
   fillProjects("#e-project", known?(it.project||NOPROJ):OTHER);
   $("#e-project-other").value=known?"":(it.project||"");
   $("#e-project-other").classList.toggle("hide",known);
-  $("#e-date").value=it.date||today();
+  setDate("#e-y","#e-m","#e-d",it.date||today());
   $("#e-note").value=it.note||"";
   segSet("#e-seg",editStatus);
   $("#roMeta").innerHTML=`<div><span>ເພີ່ມໂດຍ</span><b>${esc(who(it.by))}</b></div>
@@ -223,7 +249,7 @@ $("#btnSave").onclick=async()=>{
   if(!editId)return;const cur=items.find(x=>x.id===editId);
   const {name,autoNum}=parseName($("#e-name").value,isAuto(cur)?cur.autoNum:nextNum());
   try{await updateDoc(doc(db,"customers",editId),{phone:$("#e-phone").value.trim(),name,autoNum,
-      status:editStatus,project:projValue("#e-project","#e-project-other"),date:$("#e-date").value||today(),note:$("#e-note").value.trim()});
+      status:editStatus,project:projValue("#e-project","#e-project-other"),date:getDate("#e-y","#e-m","#e-d"),note:$("#e-note").value.trim()});
     closeSheet();toast("ແກ້ໄຂແລ້ວ ✓");
   }catch(e){showErr("#editerr",e);}
 };
