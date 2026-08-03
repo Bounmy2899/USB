@@ -56,7 +56,7 @@ input,select,textarea{font-size:16px;color:inherit}
 .sidefoot p{margin:10px 0 0;color:#D6DCEC;font-size:12px;line-height:1.7}
 .sidefoot p b{display:block;color:#fff;font-size:13px;margin-bottom:3px}
 .sidefoot .tel{display:inline-block;margin-top:6px;background:var(--orange);color:#fff;font-weight:700;border-radius:999px;padding:3px 12px;font-size:12.5px}
-main{padding:20px;max-width:1180px;width:100%;min-width:0;margin-inline:auto}
+main{padding:20px;max-width:1600px;width:100%;min-width:0;margin-inline:auto}
 
 /* ── ກ່ອງຜົນງານຂ້າງຟອມ ── */
 .tstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
@@ -237,7 +237,7 @@ code{font-size:12px;background:var(--line-2);padding:1px 5px;border-radius:4px;w
    ຈໍຄອມ — ຈັດຂະໜາດ ແລະ ຕຳແໜ່ງໃຫ້ອ່ານງ່າຍ
    ═══════════════════════════════════════════════ */
 @media(min-width:841px){
-  main{margin-inline:auto;max-width:1180px;padding:26px 32px 56px}
+  main{margin-inline:auto;max-width:1600px;padding:26px 32px 56px}
 
   /* ຟອມ — ຈຳກັດຄວາມກວ້າງ ບໍ່ໃຫ້ຕາກວາດໄກ */
   .view.on#v-add{
