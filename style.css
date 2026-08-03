@@ -246,16 +246,31 @@ code{font-size:12px;background:var(--line-2);padding:1px 5px;border-radius:4px;w
   }
   .view.on#v-add > .card{margin-top:0;max-width:none}
   #sidecard{position:sticky;top:calc(var(--hh,86px) + 26px)}
-  #v-list{max-width:960px}
+  /* ── ລາຍຊື່: ຕົວກັ່ນຕອງຊ້າຍ + ຜົນລັບຂວາ ── */
+  .view.on#v-list{
+    display:grid;grid-template-columns:310px minmax(0,1fr);
+    gap:16px;align-items:start;
+  }
+  .view.on#v-list > .minibar{grid-column:1;grid-row:1;margin:0;flex-direction:column;align-items:flex-start;gap:8px}
+  .view.on#v-list > .minibar select{width:100%}
+  .view.on#v-list > .card:nth-of-type(1){grid-column:1;grid-row:2;margin-top:0;position:sticky;top:calc(var(--hh,86px) + 26px)}
+  .view.on#v-list > .card:nth-of-type(2){grid-column:2;grid-row:1 / span 2;margin-top:0}
 
   /* ສະຫຼຸບ + ຜູ້ດູແລ — ວາງເປັນ 2 ຖັນແບບ dashboard */
   .view.on#v-sum,.view.on#v-admin{
     display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:16px;align-items:start;
+    gap:16px;align-items:start;grid-auto-flow:row dense;
   }
   .view.on#v-sum > .card,.view.on#v-admin > .card{margin-top:0}
-  .view.on#v-sum > .card:nth-child(1),
-  .view.on#v-sum > .card:nth-child(6),
+  /* ສະຫຼຸບ — ຈັດລຳດັບ: ຕົວເລກລວມ → ໂຄງການ|ຜົນງານ → ຕາຕະລາງລູກຄ້າ → ທີ່ຖືກລຶບ → ພິມ */
+  .view.on#v-sum > .card:nth-child(1){order:1;grid-column:1/-1}
+  .view.on#v-sum > .card:nth-child(2){order:2}
+  .view.on#v-sum > .card:nth-child(4){order:3}
+  .view.on#v-sum > .card:nth-child(3){order:4;grid-column:1/-1}
+  .view.on#v-sum > .card:nth-child(5){order:5;grid-column:1/-1}
+  .view.on#v-sum > .card:nth-child(6){order:6;grid-column:1/-1}
+
+  /* ຜູ້ດູແລ — ໝາຍເຫດເຕັມແຖວ, ໂຄງການ|ສ້າງບັນຊີ ຄູ່ກັນ, ລາຍຊື່ເຕັມແຖວ */
   .view.on#v-admin > .card:nth-child(1),
   .view.on#v-admin > .card:nth-child(4){grid-column:1/-1}
 
