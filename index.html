@@ -56,6 +56,7 @@
     <div class="userbox">
       <span class="role" id="roleTag">ພະນັກງານ</span>
       <span class="em" id="who"></span>
+      <button class="linkbtn" id="btnProfile">ໂປຣໄຟລ໌</button> ·
       <button class="linkbtn" id="btnChangePw">ປ່ຽນລະຫັດ</button> ·
       <button class="linkbtn" id="btnOut">ອອກ</button>
     </div>
@@ -206,6 +207,26 @@
     <div style="height:8px"></div>
     <button class="btn ghost hide" id="btnRestore">↩ ກູ້ຄືນລາຍການນີ້</button>
   </div>
+</div></div>
+
+<div class="sheet" id="profsheet"><div>
+  <h3 id="profTitle">ໂປຣໄຟລ໌ຂອງຂ້ອຍ</h3>
+  <div class="err" id="proferr"></div>
+  <div class="profpic">
+    <div class="avatar-lg" id="prof-pic"></div>
+    <div class="profpic-btns">
+      <label class="btn ghost sm" for="prof-file">ເລືອກຮູບ</label>
+      <input type="file" id="prof-file" accept="image/*" style="display:none">
+      <button class="btn ghost sm" id="btnProfClear">ລຶບຮູບ</button>
+    </div>
+  </div>
+  <label class="f"><span>ຊື່ທີ່ຈະສະແດງ</span><input class="input" id="prof-name" placeholder="ຊື່ຫຼິ້ນ ຫຼື ຊື່ເຕັມ"></label>
+  <label class="f"><span>ຕຳແໜ່ງ / ໜ້າທີ່</span><input class="input" id="prof-title" placeholder="ເຊັ່ນ: ພະນັກງານຂາຍ"></label>
+  <label class="f"><span>ເບີໂທຕິດຕໍ່</span><input class="input num" id="prof-phone" type="tel" inputmode="tel" placeholder="020 xxxx xxxx"></label>
+  <div class="ro" id="prof-meta"></div>
+  <button class="btn" id="btnProfSave">ບັນທຶກໂປຣໄຟລ໌</button>
+  <div style="height:8px"></div>
+  <button class="btn ghost" id="btnProfCancel">ຍົກເລີກ</button>
 </div></div>
 
 <div class="sheet" id="pwsheet"><div>

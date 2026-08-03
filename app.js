@@ -37,6 +37,36 @@ const OWNERS=MANAGERS.map(e=>e.toLowerCase());
 const isOwner=e=>OWNERS.includes((e||"").toLowerCase());
 const roleOf=e=>{const s=staff.find(x=>(x.email||"").toLowerCase()===(e||"").toLowerCase());return s?(s.role||"staff"):"staff";};
 const isManager=e=>isOwner(e)||roleOf(e)==="manager";
+const staffOf=e=>staff.find(x=>(x.email||"").toLowerCase()===(e||"").toLowerCase())||null;
+const picOf=e=>{const s=staffOf(e);return s&&s.photo?s.photo:"";};
+function tagHTML(email,extra){
+  const p=picOf(email),n=who(email);
+  return p?`<span class="tag pic ${extra||""}" style="background-image:url('${p}')"></span>`
+          :`<span class="tag ${extra||""}">${esc(n.slice(0,2))}</span>`;
+}
+/* ຫຍໍ້ຮູບໃຫ້ນ້ອຍ ແລ້ວເກັບເປັນ text ໃນ Firestore (ບໍ່ຕ້ອງໃຊ້ Storage) */
+function shrinkImage(file,max=240,q=0.82){
+  return new Promise((res,rej)=>{
+    const fr=new FileReader();
+    fr.onerror=()=>rej(new Error("ອ່ານໄຟລ໌ບໍ່ໄດ້"));
+    fr.onload=()=>{
+      const img=new Image();
+      img.onerror=()=>rej(new Error("ຮູບບໍ່ຖືກຕ້ອງ"));
+      img.onload=()=>{
+        const side=Math.min(img.width,img.height);
+        const sx=(img.width-side)/2, sy=(img.height-side)/2;
+        const c=document.createElement("canvas"); c.width=max; c.height=max;
+        c.getContext("2d").drawImage(img,sx,sy,side,side,0,0,max,max);
+        let out=c.toDataURL("image/jpeg",q);
+        let tries=0;
+        while(out.length>180000 && tries<5){ q-=0.12; out=c.toDataURL("image/jpeg",Math.max(q,0.3)); tries++; }
+        res(out);
+      };
+      img.src=fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
 
 const NOPROJ="ບໍ່ໄດ້ລະບຸ";
 const OTHER="ອື່ນໆ (ພິມເອງ)";
@@ -314,7 +344,7 @@ function renderSummary(){
   $("#byuser").innerHTML=ems.length?ems.map(em=>{
     const a=rows.filter(r=>r.by===em),s=a.filter(r=>r.status==="sold").length;
     const d=items.filter(i=>i.deleted&&inM(i)&&i.deletedBy===em).length;
-    return `<div class="item"><span class="tag">${esc(who(em).slice(0,2))}</span>
+    return `<div class="item">${tagHTML(em)}
       <span class="meta"><span class="nm">${esc(who(em))}</span>
       <span class="sub num">ເພີ່ມ ${a.length} · ຂາຍໄດ້ ${s} · ລຶບ ${d}</span></span></div>`;
   }).join(""):`<div class="empty">ບໍ່ມີຂໍ້ມູນ</div>`;
@@ -409,12 +439,13 @@ function renderStaff(){
     const mg=own||(s.role==="manager");
     const off=s.active===false;
     return `<div class="item" style="flex-wrap:wrap;${off?"opacity:.55":""}">
-      <span class="tag">${esc((s.name||s.email||"?").slice(0,2))}</span>
+      ${tagHTML(s.email)}
       <span class="meta"><span class="nm">${esc(s.name||"(ບໍ່ໄດ້ໃສ່ຊື່)")}</span>
-        <span class="ph">${esc(s.email||"")}</span>
+        <span class="ph">${esc(s.email||"")}${s.title?" · "+esc(s.title):""}</span>
         <span class="sub">${own?"ເຈົ້າຂອງລະບົບ":(mg?"ຜູ້ດູແລ":(off?"ຖືກປິດການໃຊ້ງານ":"ພະນັກງານ"))}</span></span>
       ${own?"":`<span style="display:flex;gap:6px;flex-wrap:wrap;width:100%;margin-top:6px">
         <button class="btn ${mg?"ghost":"sm-navy"} sm" data-role="${esc(s.email)}" data-mg="${mg?1:0}">${mg?"↓ ຍົກເລີກຜູ້ດູແລ":"↑ ຕັ້ງເປັນຜູ້ດູແລ"}</button>
+        <button class="btn ghost sm" data-prof="${esc(s.email)}">ແກ້ໂປຣໄຟລ໌</button>
         <button class="btn ghost sm" data-pw="${esc(s.email)}">ສົ່ງລິງຄ໌ປ່ຽນລະຫັດ</button>
         <button class="btn ${off?"ghost":"danger"} sm" data-tog="${esc(s.email)}" data-off="${off?1:0}">${off?"ເປີດໃຊ້ງານ":"ປິດການໃຊ້ງານ"}</button>
         <button class="btn danger sm" data-rm="${esc(s.email)}">ລຶບອອກຈາກລາຍຊື່</button>
@@ -422,7 +453,8 @@ function renderStaff(){
   }).join(""):`<div class="empty">ຍັງບໍ່ມີພະນັກງານໃນລະບົບ</div>`;
 }
 $("#stafflist").addEventListener("click",async e=>{
-  const pw=e.target.closest("[data-pw]"),tg=e.target.closest("[data-tog]"),rm=e.target.closest("[data-rm]"),rl=e.target.closest("[data-role]");
+  const pw=e.target.closest("[data-pw]"),tg=e.target.closest("[data-tog]"),rm=e.target.closest("[data-rm]"),rl=e.target.closest("[data-role]"),pf=e.target.closest("[data-prof]");
+  if(pf){ openProfile(pf.dataset.prof); return; }
   if(rl){
     const wasMg=rl.dataset.mg==="1";
     if(!confirm(wasMg?"ຍົກເລີກສິດຜູ້ດູແລຂອງ "+rl.dataset.role+"?":"ຕັ້ງ "+rl.dataset.role+" ເປັນຜູ້ດູແລ?\nລາວຈະເຫັນແຖບ ສະຫຼຸບ ແລະ ຜູ້ດູແລ ຄືກັນກັບເຈົ້າ"))return;
@@ -445,11 +477,62 @@ $("#stafflist").addEventListener("click",async e=>{
       toast(off?"ເປີດໃຊ້ງານແລ້ວ":"ປິດການໃຊ້ງານແລ້ວ");}catch(err){toast("ບໍ່ສຳເລັດ: "+err.code);}}
 });
 
+
+/* ---------- ໂປຣໄຟລ໌ ---------- */
+let profEmail=null, profPhoto="";
+function paintProfPic(){
+  const el=$("#prof-pic");
+  if(profPhoto){ el.style.backgroundImage=`url('${profPhoto}')`; el.textContent=""; }
+  else { el.style.backgroundImage="none"; el.textContent=(who(profEmail)||"?").slice(0,2); }
+}
+function openProfile(email){
+  profEmail=(email||auth.currentUser.email).toLowerCase();
+  const s=staffOf(profEmail)||{};
+  const mine=profEmail===(auth.currentUser.email||"").toLowerCase();
+  $("#profTitle").textContent=mine?"ໂປຣໄຟລ໌ຂອງຂ້ອຍ":"ແກ້ໂປຣໄຟລ໌: "+profEmail;
+  profPhoto=s.photo||"";
+  $("#prof-name").value=s.name||"";
+  $("#prof-title").value=s.title||"";
+  $("#prof-phone").value=s.phone||"";
+  $("#prof-meta").innerHTML=`<div><span>ອີເມວ</span><b>${esc(profEmail)}</b></div>
+    <div><span>ສິດ</span><b>${isOwner(profEmail)?"ເຈົ້າຂອງລະບົບ":(isManager(profEmail)?"ຜູ້ດູແລ":"ພະນັກງານ")}</b></div>`;
+  $("#proferr").classList.remove("on");
+  paintProfPic();
+  $("#profsheet").classList.add("on");
+}
+$("#btnProfile").onclick=()=>openProfile(auth.currentUser.email);
+$("#btnProfCancel").onclick=()=>$("#profsheet").classList.remove("on");
+$("#profsheet").addEventListener("click",e=>{if(e.target===$("#profsheet"))$("#profsheet").classList.remove("on");});
+$("#btnProfClear").onclick=()=>{profPhoto="";paintProfPic();};
+$("#prof-file").addEventListener("change",async e=>{
+  const f=e.target.files&&e.target.files[0]; if(!f)return;
+  try{ profPhoto=await shrinkImage(f); paintProfPic(); }
+  catch(err){ showErr("#proferr",{message:err.message}); }
+  e.target.value="";
+});
+$("#btnProfSave").onclick=async()=>{
+  if(!profEmail)return;
+  const b=$("#btnProfSave");b.disabled=true;
+  try{
+    await setDoc(doc(db,"staff",profEmail),{
+      email:profEmail,
+      name:$("#prof-name").value.trim(),
+      title:$("#prof-title").value.trim(),
+      phone:$("#prof-phone").value.trim(),
+      photo:profPhoto
+    },{merge:true});
+    $("#profsheet").classList.remove("on"); toast("ບັນທຶກໂປຣໄຟລ໌ແລ້ວ ✓");
+  }catch(e){ showErr("#proferr",e); }
+  b.disabled=false;
+};
+
 function applyRole(){
   const u=auth.currentUser; if(!u) return;
   const was=manager;
   manager=isManager(u.email);
   $("#roleTag").textContent=isOwner(u.email)?"ເຈົ້າຂອງລະບົບ":(manager?"ຜູ້ດູແລ":"ພະນັກງານ");
+  const mypic=picOf(u.email);
+  $("#who").innerHTML=(mypic?`<span class="hpic" style="background-image:url('${mypic}')"></span>`:"")+esc(who(u.email)||u.email);
   $("#navSum").classList.toggle("hide",!manager);
   $("#navAdmin").classList.toggle("hide",!manager);
   if(was&&!manager){
@@ -466,6 +549,9 @@ onAuthStateChanged(auth,user=>{
     $("#who").textContent=user.email;
     $("#pass").value="";
     applyRole();
+    /* ຖ້າຍັງບໍ່ມີແຖວຂອງຕົນເອງ ໃຫ້ສ້າງໄວ້ ເພື່ອຕັ້ງໂປຣໄຟລ໌ໄດ້ */
+    setDoc(doc(db,"staff",(user.email||"").toLowerCase()),
+      {email:(user.email||"").toLowerCase(),active:true},{merge:true}).catch(()=>{});
     if(!manager){
       document.querySelectorAll(".view").forEach(v=>v.classList.remove("on"));
       $("#v-add").classList.add("on");
