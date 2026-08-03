@@ -369,7 +369,28 @@ function renderSummary(){
       <span class="sub warn">ລຶບໂດຍ ${esc(who(it.deletedBy))}</span></span>
       <span class="dt num">${esc(it.date||"")}</span></button>`).join(""):`<div class="empty">ບໍ່ມີລາຍການທີ່ຖືກລຶບ</div>`;
 }
-const renderAll=()=>{fillMonths("#m-month");renderList();renderSummary();$("#a-hint").textContent="A"+nextNum();};
+
+/* ---------- ກ່ອງຜົນງານຂອງຕົນເອງ (ຂ້າງຟອມ) ---------- */
+function renderToday(){
+  const u=auth.currentUser; if(!u) return;
+  const me=(u.email||"").toLowerCase();
+  const mine=alive().filter(i=>(i.by||"").toLowerCase()===me);
+  const td=today(), mk=td.slice(0,7);
+  const dayRows=mine.filter(i=>i.date===td);
+  const monRows=mine.filter(i=>(i.date||"").startsWith(mk));
+  $("#t-today").textContent=dayRows.length;
+  $("#t-month").textContent=monRows.length;
+  $("#t-sold").textContent=monRows.filter(i=>i.status==="sold").length;
+  $("#todaylist").innerHTML=dayRows.length?dayRows.slice(0,8).map(it=>{
+    const lb=labelOf(it);
+    return `<button class="item" data-id="${it.id}">
+      <span class="tag ${it.status==="sold"?"sold":""}">${esc(isAuto(it)?lb:lb.slice(0,2))}</span>
+      <span class="meta"><span class="nm">${esc(lb)}</span>
+      <span class="ph num">${esc(it.phone||"")}</span></span></button>`;
+  }).join(""):`<div class="empty" style="padding:18px 8px;font-size:14px">ມື້ນີ້ຍັງບໍ່ທັນບັນທຶກ</div>`;
+}
+
+const renderAll=()=>{fillMonths("#m-month");renderList();renderSummary();renderToday();$("#a-hint").textContent="A"+nextNum();};
 
 $("#btnPrint").onclick=()=>{
   const mk=$("#s-month").value,inM=it=>mk==="all"||(it.date||"").startsWith(mk);

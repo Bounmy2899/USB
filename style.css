@@ -58,6 +58,15 @@ input,select,textarea{font-size:16px;color:inherit}
 .sidefoot .tel{display:inline-block;margin-top:6px;background:var(--orange);color:#fff;font-weight:700;border-radius:999px;padding:3px 12px;font-size:12.5px}
 main{padding:20px;max-width:1180px;width:100%;min-width:0;margin-inline:auto}
 
+/* ── ກ່ອງຜົນງານຂ້າງຟອມ ── */
+.tstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tstats div{background:var(--line-2);border-radius:10px;padding:12px 6px;text-align:center}
+.tstats b{display:block;font-size:26px;font-weight:700;color:var(--navy);line-height:1.15}
+.tstats div:last-child b{color:var(--green)}
+.tstats span{font-size:11.5px;color:var(--muted)}
+#todaylist .item{padding:9px 4px}
+#todaylist .tag{width:34px;height:34px;font-size:12px}
+
 /* ── ສະແດງເທື່ອລະໜ້າ (ຫ້າມລຶບ: ເປັນຫົວໃຈຂອງການສະຫຼັບແຖບ) ── */
 .view{display:none}
 .view.on{display:block;animation:fade .16s ease}
@@ -231,7 +240,12 @@ code{font-size:12px;background:var(--line-2);padding:1px 5px;border-radius:4px;w
   main{margin-inline:auto;max-width:1180px;padding:26px 32px 56px}
 
   /* ຟອມ — ຈຳກັດຄວາມກວ້າງ ບໍ່ໃຫ້ຕາກວາດໄກ */
-  #v-add > .card{max-width:720px}
+  .view.on#v-add{
+    display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.85fr);
+    gap:16px;align-items:start;
+  }
+  .view.on#v-add > .card{margin-top:0;max-width:none}
+  #sidecard{position:sticky;top:calc(var(--hh,86px) + 26px)}
   #v-list{max-width:960px}
 
   /* ສະຫຼຸບ + ຜູ້ດູແລ — ວາງເປັນ 2 ຖັນແບບ dashboard */
