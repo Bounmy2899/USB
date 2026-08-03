@@ -1,15 +1,7 @@
-/* ═══════ 1) ຄ່າ Firebase ═══════ */
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyCkdmglm_iIWmzFvbekGoyff_4QeIBAhbM",
-  authDomain: "usb1-a6129.firebaseapp.com",
-  projectId: "usb1-a6129",
-  storageBucket: "usb1-a6129.firebasestorage.app",
-  messagingSenderId: "366225792922",
-  appId: "1:366225792922:web:41e8a26c5e8be185922423"
-};
-
-/* ═══════ 2) ອີເມວຜູ້ຈັດການ (ເຫັນທຸກຢ່າງ) ═══════ */
-const MANAGERS = ["bounmy2899@gmail.com"];
+/* ══════════════════════════════════════════════════
+   ຄ່າຕັ້ງທັງໝົດຢູ່ໄຟລ໌ config.js — ແກ້ຢູ່ນັ້ນ
+   ══════════════════════════════════════════════════ */
+import { MANAGERS, FIREBASE_CONFIG } from "./config.js";
 
 /* ═══════ 3) ລາຍຊື່ໂຄງການ — ຈັດການໄດ້ໃນແຖບ “ຜູ້ດູແລ” ═══════ */
 let PROJECTS = [];
@@ -41,6 +33,10 @@ const CFG   = doc(db,"config","app");
 let items=[], staff=[], unsub=null, unsubStaff=null, unsubCfg=null;
 let editId=null, addStatus="open", editStatus="open", listFilter="all";
 let manager=false;
+const OWNERS=MANAGERS.map(e=>e.toLowerCase());
+const isOwner=e=>OWNERS.includes((e||"").toLowerCase());
+const roleOf=e=>{const s=staff.find(x=>(x.email||"").toLowerCase()===(e||"").toLowerCase());return s?(s.role||"staff"):"staff";};
+const isManager=e=>isOwner(e)||roleOf(e)==="manager";
 
 const NOPROJ="ບໍ່ໄດ້ລະບຸ";
 const OTHER="ອື່ນໆ (ພິມເອງ)";
@@ -409,14 +405,16 @@ $("#btnMakeStaff").onclick=async()=>{
 };
 function renderStaff(){
   $("#stafflist").innerHTML=staff.length?staff.map(s=>{
-    const mg=MANAGERS.includes((s.email||"").toLowerCase());
+    const own=isOwner(s.email);
+    const mg=own||(s.role==="manager");
     const off=s.active===false;
     return `<div class="item" style="flex-wrap:wrap;${off?"opacity:.55":""}">
       <span class="tag">${esc((s.name||s.email||"?").slice(0,2))}</span>
       <span class="meta"><span class="nm">${esc(s.name||"(ບໍ່ໄດ້ໃສ່ຊື່)")}</span>
         <span class="ph">${esc(s.email||"")}</span>
-        <span class="sub">${mg?"ຜູ້ຈັດການ":(off?"ຖືກປິດການໃຊ້ງານ":"ພະນັກງານ")}</span></span>
-      ${mg?"":`<span style="display:flex;gap:6px;flex-wrap:wrap;width:100%;margin-top:6px">
+        <span class="sub">${own?"ເຈົ້າຂອງລະບົບ":(mg?"ຜູ້ດູແລ":(off?"ຖືກປິດການໃຊ້ງານ":"ພະນັກງານ"))}</span></span>
+      ${own?"":`<span style="display:flex;gap:6px;flex-wrap:wrap;width:100%;margin-top:6px">
+        <button class="btn ${mg?"ghost":"sm-navy"} sm" data-role="${esc(s.email)}" data-mg="${mg?1:0}">${mg?"↓ ຍົກເລີກຜູ້ດູແລ":"↑ ຕັ້ງເປັນຜູ້ດູແລ"}</button>
         <button class="btn ghost sm" data-pw="${esc(s.email)}">ສົ່ງລິງຄ໌ປ່ຽນລະຫັດ</button>
         <button class="btn ${off?"ghost":"danger"} sm" data-tog="${esc(s.email)}" data-off="${off?1:0}">${off?"ເປີດໃຊ້ງານ":"ປິດການໃຊ້ງານ"}</button>
         <button class="btn danger sm" data-rm="${esc(s.email)}">ລຶບອອກຈາກລາຍຊື່</button>
@@ -424,7 +422,15 @@ function renderStaff(){
   }).join(""):`<div class="empty">ຍັງບໍ່ມີພະນັກງານໃນລະບົບ</div>`;
 }
 $("#stafflist").addEventListener("click",async e=>{
-  const pw=e.target.closest("[data-pw]"),tg=e.target.closest("[data-tog]"),rm=e.target.closest("[data-rm]");
+  const pw=e.target.closest("[data-pw]"),tg=e.target.closest("[data-tog]"),rm=e.target.closest("[data-rm]"),rl=e.target.closest("[data-role]");
+  if(rl){
+    const wasMg=rl.dataset.mg==="1";
+    if(!confirm(wasMg?"ຍົກເລີກສິດຜູ້ດູແລຂອງ "+rl.dataset.role+"?":"ຕັ້ງ "+rl.dataset.role+" ເປັນຜູ້ດູແລ?\nລາວຈະເຫັນແຖບ ສະຫຼຸບ ແລະ ຜູ້ດູແລ ຄືກັນກັບເຈົ້າ"))return;
+    try{await setDoc(doc(db,"staff",rl.dataset.role),{role:wasMg?"staff":"manager"},{merge:true});
+      toast(wasMg?"ຍົກເລີກສິດແລ້ວ":"ຕັ້ງເປັນຜູ້ດູແລແລ້ວ ✓");}
+    catch(err){toast("ບໍ່ສຳເລັດ: "+err.code);}
+    return;
+  }
   if(rm){
     if(!confirm("ລຶບ "+rm.dataset.rm+" ອອກຈາກລາຍຊື່?\n\nສຳຄັນ: ຕ້ອງໄປລຶບບັນຊີໃນ Firebase Console ກ່ອນ ບໍ່ດັ່ງນັ້ນລາວຍັງເຂົ້າລະບົບໄດ້"))return;
     try{await deleteDoc(doc(db,"staff",rm.dataset.rm));toast("ລຶບອອກຈາກລາຍຊື່ແລ້ວ");}
@@ -439,15 +445,27 @@ $("#stafflist").addEventListener("click",async e=>{
       toast(off?"ເປີດໃຊ້ງານແລ້ວ":"ປິດການໃຊ້ງານແລ້ວ");}catch(err){toast("ບໍ່ສຳເລັດ: "+err.code);}}
 });
 
+function applyRole(){
+  const u=auth.currentUser; if(!u) return;
+  const was=manager;
+  manager=isManager(u.email);
+  $("#roleTag").textContent=isOwner(u.email)?"ເຈົ້າຂອງລະບົບ":(manager?"ຜູ້ດູແລ":"ພະນັກງານ");
+  $("#navSum").classList.toggle("hide",!manager);
+  $("#navAdmin").classList.toggle("hide",!manager);
+  if(was&&!manager){
+    document.querySelectorAll(".view").forEach(v=>v.classList.remove("on"));
+    $("#v-add").classList.add("on");
+    $("#nav").querySelectorAll("button").forEach(x=>x.removeAttribute("aria-current"));
+    $("#nav").querySelector('[data-v="add"]').setAttribute("aria-current","page");
+  }
+}
+
 onAuthStateChanged(auth,user=>{
   if(user){
-    manager=MANAGERS.includes((user.email||"").toLowerCase());
     showApp();
     $("#who").textContent=user.email;
-    $("#roleTag").textContent=manager?"ຜູ້ຈັດການ":"ພະນັກງານ";
-    $("#navSum").classList.toggle("hide",!manager);
-    $("#navAdmin").classList.toggle("hide",!manager);
     $("#pass").value="";
+    applyRole();
     if(!manager){
       document.querySelectorAll(".view").forEach(v=>v.classList.remove("on"));
       $("#v-add").classList.add("on");
@@ -461,7 +479,8 @@ onAuthStateChanged(auth,user=>{
       else toast("ໂຫຼດຂໍ້ມູນບໍ່ໄດ້: "+err.code);
     });
     if(!unsubStaff)unsubStaff=onSnapshot(STAFF,snap=>{
-      staff=snap.docs.map(d=>({id:d.id,...d.data()}));renderStaff();renderList();renderSummary();
+      staff=snap.docs.map(d=>({id:d.id,...d.data()}));
+      applyRole();renderStaff();renderList();renderSummary();
     },()=>{});
     if(!unsubCfg)unsubCfg=onSnapshot(CFG,d=>{
       const c=d.data()||{};
