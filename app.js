@@ -13,7 +13,7 @@ import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWith
          updatePassword, reauthenticateWithCredential, EmailAuthProvider }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection,
-         addDoc, setDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp }
+         addDoc, setDoc, updateDoc, deleteDoc, getDoc, doc, onSnapshot, query, orderBy, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = s => document.querySelector(s);
@@ -434,7 +434,8 @@ $("#btnMakeStaff").onclick=async()=>{
   b.disabled=false;
 };
 function renderStaff(){
-  $("#stafflist").innerHTML=staff.length?staff.map(s=>{
+  const visibleStaff=staff.filter(s=>!s.removed);
+  $("#stafflist").innerHTML=visibleStaff.length?visibleStaff.map(s=>{
     const own=isOwner(s.email);
     const mg=own||(s.role==="manager");
     const off=s.active===false;
@@ -464,8 +465,14 @@ $("#stafflist").addEventListener("click",async e=>{
     return;
   }
   if(rm){
-    if(!confirm("ລຶບ "+rm.dataset.rm+" ອອກຈາກລາຍຊື່?\n\nສຳຄັນ: ຕ້ອງໄປລຶບບັນຊີໃນ Firebase Console ກ່ອນ ບໍ່ດັ່ງນັ້ນລາວຍັງເຂົ້າລະບົບໄດ້"))return;
-    try{await deleteDoc(doc(db,"staff",rm.dataset.rm));toast("ລຶບອອກຈາກລາຍຊື່ແລ້ວ");}
+    if(!confirm("ລຶບ "+rm.dataset.rm+" ອອກຈາກລາຍຊື່?\n\nບັນຊີນີ້ຈະຖືກປິດແລະ຋່ອນອອກຈາກລາຍຊື່"))return;
+    try{
+      const email=rm.dataset.rm;
+      await setDoc(doc(db,"staff",email),{active:false,removed:true,removedAt:serverTimestamp(),removedBy:auth.currentUser.email},{merge:true});
+      staff=staff.map(s=>(s.email||"").toLowerCase()===email.toLowerCase()?{...s,active:false,removed:true}:s);
+      renderStaff();
+      toast("ລຶບອອກຈາກລາຍຊື່ແລ້ວ");
+    }
     catch(err){toast("ບໍ່ສຳເລັດ: "+err.code);}
     return;
   }
@@ -549,9 +556,11 @@ onAuthStateChanged(auth,user=>{
     $("#who").textContent=user.email;
     $("#pass").value="";
     applyRole();
-    /* ຖ້າຍັງບໍ່ມີແຖວຂອງຕົນເອງ ໃຫ້ສ້າງໄວ້ ເພື່ອຕັ້ງໂປຣໄຟລ໌ໄດ້ */
-    setDoc(doc(db,"staff",(user.email||"").toLowerCase()),
-      {email:(user.email||"").toLowerCase(),active:true},{merge:true}).catch(()=>{});
+    /* ສ້າງໂປຣໄຟລ໌ເຉພາະກໍລະນີທີ່ຍັງບໍ່ມີເອກະສານ: ຢ່າປຸກບັນຊີທີ່ແອດມິນລຶບອອກແລ້ວ */
+    const myStaffRef=doc(db,"staff",(user.email||"").toLowerCase());
+    getDoc(myStaffRef).then(snap=>{
+      if(!snap.exists())return setDoc(myStaffRef,{email:(user.email||"").toLowerCase(),active:true});
+    }).catch(()=>{});
     if(!manager){
       document.querySelectorAll(".view").forEach(v=>v.classList.remove("on"));
       $("#v-add").classList.add("on");
