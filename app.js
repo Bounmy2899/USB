@@ -127,6 +127,19 @@ const getDate=(py,pm,pd)=>`${$(py).value}-${$(pm).value}-${$(pd).value}`;
 buildDate("#a-y","#a-m","#a-d"); buildDate("#e-y","#e-m","#e-d");
 setDate("#a-y","#a-m","#a-d",today());
 
+
+/* ---------- ວັດຄວາມສູງແຖບເທິງ ເພື່ອລັອກແຖບຂ້າງໃຫ້ພໍດີ ---------- */
+function syncHeaderHeight(){
+  const h=document.querySelector(".topbar");
+  if(h) document.documentElement.style.setProperty("--hh", h.offsetHeight+"px");
+}
+addEventListener("resize",syncHeaderHeight);
+if(window.ResizeObserver){
+  const ro=new ResizeObserver(syncHeaderHeight);
+  const hb=document.querySelector(".topbar"); if(hb) ro.observe(hb);
+}
+setTimeout(syncHeaderHeight,300);
+
 const GATES=["#gate","#gate-reset","#setup"];
 const showGate=id=>{GATES.forEach(g=>$(g).classList.remove("on"));$("#app").classList.add("hide");
   document.querySelectorAll(".err").forEach(x=>x.classList.remove("on"));if(id)$(id).classList.add("on");scrollTo(0,0);};
@@ -575,6 +588,7 @@ onAuthStateChanged(auth,user=>{
       const c=d.data()||{};
       const t=c.banner||"";
       $("#banner").textContent=t;$("#banner").classList.toggle("hide",!t);
+      setTimeout(syncHeaderHeight,60);
       $("#ad-banner").value=t;
       PROJECTS=Array.isArray(c.projects)?c.projects:[];
       renderProjects();
