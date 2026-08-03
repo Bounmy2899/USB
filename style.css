@@ -56,7 +56,7 @@ input,select,textarea{font-size:16px;color:inherit}
 .sidefoot p{margin:10px 0 0;color:#D6DCEC;font-size:12px;line-height:1.7}
 .sidefoot p b{display:block;color:#fff;font-size:13px;margin-bottom:3px}
 .sidefoot .tel{display:inline-block;margin-top:6px;background:var(--orange);color:#fff;font-weight:700;border-radius:999px;padding:3px 12px;font-size:12.5px}
-main{padding:20px;max-width:1600px;width:100%;min-width:0;margin-inline:auto}
+main{padding:20px;max-width:none;width:100%;min-width:0;margin-inline:auto}
 
 /* ── ກ່ອງຜົນງານຂ້າງຟອມ ── */
 .tstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
@@ -237,46 +237,72 @@ code{font-size:12px;background:var(--line-2);padding:1px 5px;border-radius:4px;w
    ຈໍຄອມ — ຈັດຂະໜາດ ແລະ ຕຳແໜ່ງໃຫ້ອ່ານງ່າຍ
    ═══════════════════════════════════════════════ */
 @media(min-width:841px){
-  main{margin-inline:auto;max-width:1600px;padding:26px 32px 56px}
+  main{margin-inline:auto;max-width:none;padding:22px 26px 34px}
 
-  /* ຟອມ — ຈຳກັດຄວາມກວ້າງ ບໍ່ໃຫ້ຕາກວາດໄກ */
+  /* ຟອມ — ເຕັມພື້ນທີ່ ບໍ່ໃຫ້ມີບ່ອນຫວ່າງ */
   .view.on#v-add{
-    display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.85fr);
-    gap:16px;align-items:start;
+    display:grid;grid-template-columns:minmax(0,1.35fr) minmax(320px,1fr);
+    gap:16px;align-items:stretch;
+    min-height:calc(100vh - var(--hh,86px) - 82px);
   }
   .view.on#v-add > .card{margin-top:0;max-width:none}
-  .view.on#v-add > :nth-child(1){grid-column:1}
-  .view.on#v-add > :nth-child(2){grid-column:2}
-  #sidecard{position:sticky;top:calc(var(--hh,86px) + 26px)}
+  .view.on#v-add > :nth-child(1){grid-column:1;display:flex;flex-direction:column}
+  .view.on#v-add > :nth-child(1) > label.f:last-of-type{flex:1;display:flex;flex-direction:column}
+  .view.on#v-add > :nth-child(1) textarea.input{flex:1;min-height:90px}
+  .view.on#v-add > :nth-child(2){grid-column:2;display:flex;flex-direction:column}
+  .view.on#v-add #todaylist{flex:1}
+  .view.on#v-add .tstats div{padding:18px 8px}
+  .view.on#v-add .tstats b{font-size:34px}
+  .view.on#v-add .tstats span{font-size:13px}
+  #sidecard{align-self:stretch}
   /* ── ລາຍຊື່: ຕົວກັ່ນຕອງຊ້າຍ + ຜົນລັບຂວາ ── */
   .view.on#v-list{
-    display:grid;grid-template-columns:320px minmax(0,1fr);
+    display:grid;grid-template-columns:minmax(300px,.85fr) minmax(0,2.4fr);
     grid-template-rows:auto 1fr;
-    gap:16px;align-items:start;
+    gap:16px;align-items:stretch;
+    min-height:calc(100vh - var(--hh,86px) - 82px);
   }
   /* 1 = ແຖບຕົວເລກ+ເດືອນ, 2 = ກ່ອງຄົ້ນຫາ, 3 = ລາຍຊື່ */
-  .view.on#v-list > :nth-child(1){grid-column:1;grid-row:1;margin:0;flex-direction:column;align-items:stretch;gap:10px}
-  .view.on#v-list > :nth-child(1) select{width:100%}
-  .view.on#v-list > :nth-child(2){grid-column:1;grid-row:2;margin-top:0;align-self:start;position:sticky;top:calc(var(--hh,86px) + 26px)}
-  .view.on#v-list > :nth-child(3){grid-column:2;grid-row:1 / -1;margin-top:0;align-self:stretch;min-height:60vh}
+  .view.on#v-list > :nth-child(1){grid-column:1;grid-row:1;margin:0;flex-direction:column;align-items:stretch;gap:12px;padding:18px 20px}
+  .view.on#v-list > :nth-child(1) b{font-size:40px;line-height:1.1}
+  .view.on#v-list > :nth-child(1) select{width:100%;max-width:none;padding:12px 13px;font-size:16px}
+  .view.on#v-list > :nth-child(2){grid-column:1;grid-row:2;margin-top:0;align-self:stretch;display:flex;flex-direction:column}
+  .view.on#v-list > :nth-child(2) .input{padding:15px 15px;font-size:17px}
+  .view.on#v-list > :nth-child(2) .seg button{padding:14px 6px;font-size:16px}
+  .view.on#v-list > :nth-child(3){grid-column:2;grid-row:1 / -1;margin-top:0;align-self:stretch;display:flex;flex-direction:column}
+  .view.on#v-list > :nth-child(3) > div{flex:1;display:flex;flex-direction:column}
+  .view.on#v-list > :nth-child(3) .empty{margin:auto;font-size:17px}
+  .view.on#v-list .item{padding:15px 12px}
+  .view.on#v-list .tag{width:48px;height:48px;font-size:15px}
+  .view.on#v-list .item .nm{font-size:17px}
+  .view.on#v-list .item .ph{font-size:14.5px}
 
-  /* ສະຫຼຸບ + ຜູ້ດູແລ — ວາງເປັນ 2 ຖັນແບບ dashboard */
+  /* ສະຫຼຸບ + ຜູ້ດູແລ — ວາງເປັນ 3 ຖັນແບບ dashboard ເຕັມພື້ນທີ່ */
   .view.on#v-sum,.view.on#v-admin{
-    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:16px;align-items:start;grid-auto-flow:row dense;
+    display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:16px;align-items:stretch;grid-auto-flow:row dense;
   }
-  .view.on#v-sum > .card,.view.on#v-admin > .card{margin-top:0}
+  .view.on#v-sum > .card,.view.on#v-admin > .card{margin-top:0;display:flex;flex-direction:column}
+  .view.on#v-sum .empty,.view.on#v-admin .empty{margin:auto;font-size:16px}
   /* ສະຫຼຸບ — ຈັດລຳດັບ: ຕົວເລກລວມ → ໂຄງການ|ຜົນງານ → ຕາຕະລາງລູກຄ້າ → ທີ່ຖືກລຶບ → ພິມ */
   .view.on#v-sum > .card:nth-child(1){order:1;grid-column:1/-1}
+  .view.on#v-sum > .card:nth-child(1) .stats{grid-template-columns:repeat(4,minmax(0,1fr))}
   .view.on#v-sum > .card:nth-child(2){order:2}
   .view.on#v-sum > .card:nth-child(4){order:3}
-  .view.on#v-sum > .card:nth-child(3){order:4;grid-column:1/-1}
-  .view.on#v-sum > .card:nth-child(5){order:5;grid-column:1/-1}
+  .view.on#v-sum > .card:nth-child(5){order:4}
+  .view.on#v-sum > .card:nth-child(3){order:5;grid-column:1/-1}
   .view.on#v-sum > .card:nth-child(6){order:6;grid-column:1/-1}
+  .view.on#v-sum .bignum b{font-size:64px}
+  .view.on#v-sum .bignum span{font-size:16px}
+  .view.on#v-sum .stat{padding:18px 12px}
+  .view.on#v-sum .stat b{font-size:32px}
+  .view.on#v-sum .stat span{font-size:13px}
+  .view.on#v-sum .plots{grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:8px}
 
-  /* ຜູ້ດູແລ — ໝາຍເຫດເຕັມແຖວ, ໂຄງການ|ສ້າງບັນຊີ ຄູ່ກັນ, ລາຍຊື່ເຕັມແຖວ */
-  .view.on#v-admin > .card:nth-child(1),
-  .view.on#v-admin > .card:nth-child(4){grid-column:1/-1}
+  /* ຜູ້ດູແລ — ໝາຍເຫດເຕັມແຖວ, ໂຄງການ|ສ້າງບັນຊີ|ລາຍຊື່ ຄຽງກັນ 3 ຖັນ */
+  .view.on#v-admin{min-height:calc(100vh - var(--hh,86px) - 82px)}
+  .view.on#v-admin > .card:nth-child(1){grid-column:1/-1}
+  .view.on#v-admin > .card:nth-child(4) #stafflist{flex:1}
 
   /* ຫົວການ໌ດ — ຂີດສີສົ້ມນຳໜ້າ ໃຫ້ຫາງ່າຍ */
   .card{padding:20px}
@@ -295,7 +321,7 @@ code{font-size:12px;background:var(--line-2);padding:1px 5px;border-radius:4px;w
   .stat b{font-size:25px}
 
   /* ວັນທີ ແລະ ຊ່ອງສັ້ນ — ບໍ່ຕ້ອງເຕັມແຖວ */
-  #v-sum .input,#v-list .minibar select{max-width:280px}
+  #v-sum .input{max-width:340px}
 
   .item{padding:12px 10px}
   .sheet>div{max-width:560px}
