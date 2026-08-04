@@ -251,7 +251,7 @@ function renderList(){
     const cls=it.deleted?"gone":(it.status==="sold"?"sold":"open");
     const proj=(it.project&&it.project!==NOPROJ)?` · ${esc(it.project)}`:"";
     return `<button class="item ${it.deleted?"gone":""}" data-id="${it.id}">
-      <span class="tag ${cls}">${PERSON}</span>
+      ${tagHTML(it.by,cls)}
       <span class="meta"><span class="nm">ຊື່ລູກຄ້າ: ${esc(lb)}</span>
         <span class="ph num">ເບີ ${esc(fmtPhone(it.phone))}</span>
         ${it.deleted?`<span class="sub warn">ລຶບໂດຍ ${esc(who(it.deletedBy))}</span>`
@@ -367,10 +367,13 @@ function renderSummary(){
   const mx=Math.max(1,...counts.map(c=>c.n));
   $("#byproject").innerHTML=counts.length?counts.map((c,i)=>bar(c.p,c.n,mx,colorOf(c.p,i))).join(""):`<div class="empty">ບໍ່ມີຂໍ້ມູນ</div>`;
 
-  /* ລູກຄ້າແຕ່ລະຄົນ — ສົນໃຈ = ພື້ນສີສົ້ມ, ຊື້ແລ້ວ = ພື້ນສີຂຽວ; ເບີໂທຢູ່ເທິງ ຊື່ເຕັມຢູ່ກາງ */
+  /* ລູກຄ້າແຕ່ລະຄົນ — ຮູບໂປຣໄຟລ໌ຜູ້ເພີ່ມ + ຂອບສີສົ້ມໜາ; ເບີໂທຢູ່ເທິງ ຊື່ເຕັມຢູ່ລຸ່ມ */
   $("#plots").innerHTML=rows.length?rows.map(it=>{
-    const lb=labelOf(it);
-    return `<button class="plot ${it.status==="sold"?"sold":"open"}" data-id="${it.id}" title="${esc(lb)} · ${esc(fmtPhone(it.phone))}">
+    const lb=labelOf(it), p=picOf(it.by);
+    const av=p?`<span class="pav" style="background-image:url('${p}')"></span>`
+              :`<span class="pav">${PERSON}</span>`;
+    return `<button class="plot ${it.status==="sold"?"sold":"open"}" data-id="${it.id}" title="${esc(lb)} · ${esc(fmtPhone(it.phone))} · ເພີ່ມໂດຍ ${esc(who(it.by))}">
+      ${av}
       <span class="pph num">${esc(fmtPhone(it.phone))}</span>
       <span class="pnm">${esc(lb)}</span></button>`;
   }).join(""):`<div class="empty">ບໍ່ມີຂໍ້ມູນ</div>`;
@@ -386,7 +389,7 @@ function renderSummary(){
   }).join(""):`<div class="empty">ບໍ່ມີຂໍ້ມູນ</div>`;
 
   $("#deleted").innerHTML=gone.length?gone.map(it=>`
-    <button class="item gone" data-id="${it.id}"><span class="tag gone">${PERSON}</span>
+    <button class="item gone" data-id="${it.id}">${tagHTML(it.by,"gone")}
       <span class="meta"><span class="nm">ຊື່ລູກຄ້າ: ${esc(labelOf(it))}</span><span class="ph num">ເບີ ${esc(fmtPhone(it.phone))}</span>
       <span class="sub warn">ລຶບໂດຍ ${esc(who(it.deletedBy))}</span></span>
       <span class="dt num">${esc(it.date||"")}</span></button>`).join(""):`<div class="empty">ບໍ່ມີລາຍການທີ່ຖືກລຶບ</div>`;
@@ -406,7 +409,7 @@ function renderToday(){
   $("#todaylist").innerHTML=dayRows.length?dayRows.slice(0,8).map(it=>{
     const lb=labelOf(it);
     return `<button class="item" data-id="${it.id}">
-      <span class="tag ${it.status==="sold"?"sold":"open"}">${PERSON}</span>
+      ${tagHTML(it.by,it.status==="sold"?"sold":"open")}
       <span class="meta"><span class="nm">ຊື່ລູກຄ້າ: ${esc(lb)}</span>
       <span class="ph num">ເບີ ${esc(fmtPhone(it.phone))}</span></span></button>`;
   }).join(""):`<div class="empty" style="padding:18px 8px;font-size:14px">ມື້ນີ້ຍັງບໍ່ທັນບັນທຶກ</div>`;
